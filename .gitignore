@@ -1,0 +1,28 @@
+# ============================================================
+#  .gitignore - iOS Location Simulator
+# ============================================================
+
+# ---- 构建产物 ----
+build/
+dist/
+*.spec
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+
+# ---- 运行时日志 ----
+logs/
+
+# ---- IDE ----
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ---- 操作系统 ----
+.DS_Store
+Thumbs.db
+Desktop.ini

@@ -1,0 +1,7 @@
+﻿v: 3.3
+mode: "static"
+targetLocation:
+  lat: "30.52802386594508"
+  lng: "120.7335575167566"
+libimobiledeviceDir: "libimobiledevice"
+imageDir: "DeveloperDiskImage"
