@@ -48,7 +48,7 @@ python -m PyInstaller ios_loc_sim.spec --clean --noconfirm
 
 然后拷贝 `dist/iOS_Location_Simulator/` 到目标电脑即可，无需安装 Python。
 
-> 如需预编译版本，请查看 [Releases](https://github.com/your/repo/releases) 页面下载。
+> 如需预编译版本，请查看 [Releases](https://github.com/TiAmo-one/iOS-Location-Simulator/releases) 页面下载。
 
 ## 项目结构
 
