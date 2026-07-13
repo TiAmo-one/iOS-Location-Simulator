@@ -1,6 +1,0 @@
-﻿feat: switch to Gaode tiles, fix map issues, polish build script
-
-- Replace OpenStreetMap tiles with Gaode (高德) for China accessibility
-- Fix Leaflet attribution link navigating away in QWebEngineView (CSS pointer-events:none)
-- Rewrite build.bat with proper UTF-8 encoding (no BOM)
-- Auto-clean redundant standalone exe after build
