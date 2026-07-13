@@ -46,7 +46,7 @@ logger = logging.getLogger("GUI")
 # ============================================================
 #  内嵌 Leaflet 地图 HTML
 #  ============================================================
-#  使用 OpenStreetMap 瓦片（免费，无需 API Key）
+#  使用高德地图瓦片（国内全覆盖，免费，无需 API Key）
 #  通过 QWebChannel 实现 JavaScript ↔ Python 双向通信
 #  ============================================================
 MAP_HTML = r"""<!DOCTYPE html>
@@ -58,7 +58,7 @@ MAP_HTML = r"""<!DOCTYPE html>
 <!-- QWebChannel 桥接：让 JS 可以调用 Python 方法 -->
 <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 <style>
-*{margin:0;padding:0}html,body{height:100%}#map{height:100%}
+*{margin:0;padding:0}html,body{height:100%}#map{height:100%}.leaflet-control-attribution{pointer-events:none}
 </style>
 </head><body>
 <div id="map"></div>
@@ -67,10 +67,8 @@ MAP_HTML = r"""<!DOCTYPE html>
 // 默认中心点：成都 (30.3116, 104.3192)，缩放级别 15
 var map = L.map("map",{center:[30.3116,104.3192],zoom:15});
 
-// 使用 OpenStreetMap 标准瓦片图层
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {maxZoom:19,attribution:"&copy; OpenStreetMap"}
-).addTo(map);
+// 使用高德地图瓦片（国内最全最清晰）
+L.tileLayer("https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",{maxZoom:18,maxNativeZoom:18,subdomains:"1234",attribution:"&copy; 高德地图"}).addTo(map);
 
 var marker = null;       // 当前地图标记
 var backend = null;      // Python 端 MapBridge 对象
@@ -450,3 +448,4 @@ class MainWindow(QMainWindow):
             self._worker.stop()
             self._worker.wait(5000)  # 等待最多 5 秒
         event.accept()
+
