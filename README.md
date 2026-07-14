@@ -6,7 +6,7 @@
 
 - 🗺️ **GUI 地图选点**: Leaflet 地图点击选择目标坐标
 - 📍 **实时模拟**: 通过 DVT 协议实时修改 iPhone/iPad GPS 定位
-- 🔄 **随时更新**: 连接后可随时更改坐标，实时生效
+- 🔧 **随时更新**: 连接后可随时修改坐标，实时生效
 - ♻️ **一键恢复**: 关闭程序自动恢复真实 GPS
 
 ## 系统要求
@@ -35,18 +35,22 @@ python main_gui.py    # GUI 模式
 python main.py        # CLI 命令行模式
 ```
 
+> Windows 用户无需安装 Visual C++ Build Tools，`lzfse` 已提供预编译 wheel。
+
 ### 方式二: 打包为独立 exe
 
 ```bash
 conda activate 你的环境名
 pip install -r requirements.txt
+
+# 一键打包（推荐）
+.\build.bat
+
+# 或手动打包
 python -m PyInstaller ios_loc_sim.spec --clean --noconfirm
-# 输出在 dist/iOS_Location_Simulator/
 ```
 
-或直接双击 `build.bat`。
-
-然后拷贝 `dist/iOS_Location_Simulator/` 到目标电脑即可，无需安装 Python。
+输出为 `dist/iOS_Location_Simulator.exe`（单文件），复制到任意电脑即可运行，无需安装 Python。
 
 > 如需预编译版本，请查看 [Releases](https://github.com/TiAmo-one/iOS-Location-Simulator/releases) 页面下载。
 
@@ -59,31 +63,33 @@ iOSRealRun-cli-17-fix-quic/
 ├── run.py                   # 定位逻辑、坐标转换
 ├── config.py                # YAML 配置加载
 ├── config.yaml              # 用户配置文件
+├── build.bat                # 一键打包脚本
+├── ios_loc_sim.spec         # PyInstaller 打包配置
+├── requirements.txt         # Python 依赖
+├── wheels/                  # 预编译 wheel 文件
+│   └── lzfse-*.whl          #   lzfse (避免 MSVC 编译)
+├── .gitignore               # Git 忽略规则
+├── README.md
 │
 ├── driver/                  # 驱动层
 │   ├── __init__.py
-│   ├── connect.py           # USB 连接、RSD 隧道
+│   ├── connect.py           # USB 连接、RSD 隧道建立
 │   └── location.py          # DVT 定位会话管理
 │
 ├── gui/                     # GUI 层
 │   ├── __init__.py
 │   ├── main_window.py       # 主窗口（地图、按钮、输入框）
-│   └── location_worker.py   # 后台线程（设备通信）
+│   ├── location_worker.py   # 后台线程（设备通信）
+│   └── log_panel.py         # 实时日志面板
 │
-├── init/                    # 初始化层
-│   ├── __init__.py
-│   └── init.py              # 设备就绪检查
-│
-├── build.bat                # 一键打包脚本
-├── ios_loc_sim.spec         # PyInstaller 打包配置
-├── requirements.txt         # Python 依赖
-├── .gitignore               # Git 忽略规则（dist/ build/ 等）
-└── README.md
+└── init/                    # 初始化层
+    ├── __init__.py
+    └── init.py              # 设备就绪检查
 ```
 
 ## 坐标系统
 
-- 地图使用 **WGS-84** 坐标系（Leaflet / iOS 原生）
+- 地图使用 **WGS-84** 坐标系统（Leaflet / iOS 原生）
 - `config.yaml` 中的坐标为 **BD-09**（百度坐标系），程序自动转换
 - 转换流程: BD-09 -> GCJ-02（火星坐标）-> WGS-84
 
@@ -96,6 +102,7 @@ iOSRealRun-cli-17-fix-quic/
 | 权限不足 | 右键以管理员身份运行 |
 | 定位未生效 | 确保程序保持运行（DVT 会话需持续开放） |
 | 打包后 DLL 报错 | PyQt6 必须使用 6.8.1，6.9+ 不兼容 PyInstaller |
+| 新电脑无法连接隧道 | 本版本已通过 USB 直连解决，无需 iTunes/Bonjour |
 
 ## License
 
