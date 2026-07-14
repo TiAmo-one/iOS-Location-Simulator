@@ -35,7 +35,7 @@ if errorlevel 1 (
 
 echo.
 echo ============================================================
-del "dist\iOS_Location_Simulator.exe" 2>nul
+REM (single-file mode: nothing to clean)
 echo   Output: dist\iOS_Location_Simulator.exe
 echo ============================================================
 echo.
