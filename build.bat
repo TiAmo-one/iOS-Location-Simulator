@@ -36,10 +36,10 @@ if errorlevel 1 (
 echo.
 echo ============================================================
 del "dist\iOS_Location_Simulator.exe" 2>nul
-echo   Output: dist\iOS_Location_Simulator\
+echo   Output: dist\iOS_Location_Simulator.exe
 echo ============================================================
 echo.
-echo Copy the iOS_Location_Simulator folder to any PC and run
-echo iOS_Location_Simulator.exe as Administrator.
+echo Copy iOS_Location_Simulator.exe to any PC and run
+echo it as Administrator.
 echo.
 pause

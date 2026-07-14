@@ -22,7 +22,7 @@ import traceback
 from pymobiledevice3.lockdown import create_using_usbmux, LockdownClient
 from pymobiledevice3.exceptions import NoDeviceConnectedError
 from pymobiledevice3.services.amfi import AmfiService
-from pymobiledevice3.cli.remote import start_tunnel, verify_tunnel_imports, TunnelProtocol
+from pymobiledevice3.remote.common import TunnelProtocol
 from pymobiledevice3.remote.remote_service_discovery import RemoteServiceDiscoveryService
 from pymobiledevice3.remote.tunnel_service import CoreDeviceTunnelProxy
 
@@ -118,7 +118,6 @@ async def setup_tunnel(lockdown: LockdownClient, protocol: TunnelProtocol = Tunn
         - tunnel_ctx: 隧道上下文管理器，用于清理
     """
 
-    verify_tunnel_imports()
 
     logger.info("Starting tunnel via lockdown (USB direct)...")
     proxy = await CoreDeviceTunnelProxy.create(lockdown)
