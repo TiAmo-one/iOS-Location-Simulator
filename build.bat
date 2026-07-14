@@ -35,7 +35,7 @@ if errorlevel 1 (
 
 echo.
 echo ============================================================
-del "dist\iOS_Location_Simulator.exe" 2>nul`necho   Build successful!
+del "dist\iOS_Location_Simulator.exe" 2>nul
 echo   Output: dist\iOS_Location_Simulator\
 echo ============================================================
 echo.

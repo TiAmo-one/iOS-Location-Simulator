@@ -78,7 +78,7 @@ class LocationWorker(QThread):
         except Exception as e:
             # 捕获 asyncio.run() 自身可能的异常
             logger.error("Worker crashed: %s\n%s", e, traceback.format_exc())
-            self.error_signal.emit("Internal Error", str(e))
+            self.error_signal.emit("Internal Error", "{0}: {1}`n{2}".format(type(e).__name__, e, traceback.format_exc()))
 
     async def _async_run(self):
         """
@@ -104,7 +104,7 @@ class LocationWorker(QThread):
                     break  # 成功，退出循环
                 except AdminRequiredError as e:
                     # 权限不足: 不可自动恢复，通知用户并退出
-                    self.error_signal.emit("Permission Required", str(e))
+                    self.error_signal.emit("Permission Required", "{0}: {1}`n{2}".format(type(e).__name__, e, traceback.format_exc()))
                     return
                 except NoDeviceConnectedError:
                     # 设备未连接: 等待 2 秒后重试
@@ -119,11 +119,11 @@ class LocationWorker(QThread):
                 except DeveloperModeDisabledError as e:
                     # 开发者模式未开启: 不可自动恢复
                     self.dev_mode_off_signal.emit()
-                    self.error_signal.emit("Developer Mode Required", str(e))
+                    self.error_signal.emit("Developer Mode Required", "{0}: {1}`n{2}".format(type(e).__name__, e, traceback.format_exc()))
                     return
                 except RuntimeError as e:
                     # 其他运行时错误: 不可恢复
-                    self.error_signal.emit("Error", str(e))
+                    self.error_signal.emit("Error", "{0}: {1}`n{2}".format(type(e).__name__, e, traceback.format_exc()))
                     return
 
             # 收到停止信号或连接失败，退出
@@ -173,7 +173,7 @@ class LocationWorker(QThread):
         except Exception as e:
             # 运行期间异常: 记录日志并通知主窗口
             logger.error("Error: %s\n%s", e, traceback.format_exc())
-            self.error_signal.emit("Connection Error", str(e))
+            self.error_signal.emit("Connection Error", "{0}: {1}`n{2}".format(type(e).__name__, e, traceback.format_exc()))
 
         finally:
             # ================================================================

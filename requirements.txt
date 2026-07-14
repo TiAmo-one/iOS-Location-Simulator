@@ -1,10 +1,14 @@
 # ============================================================
 #  requirements.txt - iOS Location Simulator
 # ============================================================
-# 安装方式:
-#   conda create -n pos python=3.13 -y
-#   conda activate pos
-#   pip install -r requirements.txt
+#  安装方式:
+#    conda create -n pos python=3.13 -y
+#    conda activate pos
+#    pip install -r requirements.txt
+#
+#  Windows 用户注意: 部分依赖包 (lzfse) 的 C 扩展编译
+#  需要 Visual C++ Build Tools。
+#  本目录已提供预编译的 wheel 文件，无需手动安装编译工具。
 # ============================================================
 
 # ---- 核心依赖 ----
@@ -23,3 +27,6 @@ PyQt6-sip==13.11.1
 # ---- 打包工具 ----
 pyinstaller==6.21.0
 pyinstaller-hooks-contrib==2026.6
+
+# ---- Windows 预编译 wheel (lzfse 无官方 wheel，本地编译) ----
+./wheels/lzfse-0.4.2-cp313-cp313-win_amd64.whl; sys_platform == "win32"

@@ -40,6 +40,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebChannel import QWebChannel
 
 from gui.location_worker import LocationWorker
+from gui.log_panel import LogPanel
 
 logger = logging.getLogger("GUI")
 
@@ -221,6 +222,11 @@ class MainWindow(QMainWindow):
         # ---- 地图区域 ----
         self.web_view = QWebEngineView()
         layout.addWidget(self.web_view, stretch=1)
+
+        # ---- 日志面板区域 ----
+        self.log_panel = LogPanel(max_lines=1500)
+        self.log_panel.setFixedHeight(160)
+        layout.addWidget(self.log_panel)
 
         # 坐标输入框变化时同步更新地图标记
         self.lat_input.textChanged.connect(self._on_coord_input_changed)
@@ -420,10 +426,10 @@ class MainWindow(QMainWindow):
         self.status_bar.showMessage(msg)
 
     def _on_error(self, title: str, msg: str):
-        """Worker 发生不可恢复错误：弹窗显示。"""
+        if not msg:
+            msg = "(no details available - check logs for more info)"
         QMessageBox.critical(self, title, msg)
         self._enable_ui_on_failure()
-
     def _on_worker_finished(self):
         """Worker 线程已结束。"""
         self._worker = None

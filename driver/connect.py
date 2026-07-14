@@ -24,7 +24,7 @@ from pymobiledevice3.exceptions import NoDeviceConnectedError
 from pymobiledevice3.services.amfi import AmfiService
 from pymobiledevice3.cli.remote import start_tunnel, verify_tunnel_imports, TunnelProtocol
 from pymobiledevice3.remote.remote_service_discovery import RemoteServiceDiscoveryService
-from pymobiledevice3.remote.tunnel_service import get_remote_pairing_tunnel_services
+from pymobiledevice3.remote.tunnel_service import CoreDeviceTunnelProxy
 
 logger = logging.getLogger("connect")
 
@@ -107,48 +107,29 @@ async def reveal_developer_mode(lockdown: LockdownClient):
 
 
 async def setup_tunnel(lockdown: LockdownClient, protocol: TunnelProtocol = TunnelProtocol.TCP):
-    """
-    建立 RSD (Remote Service Discovery) 隧道。
+    """建立 RSD 隧道 —— 通过 lockdown USB 直连，不依赖 mDNS。
 
-    使用 remotepairing 协议（替代旧的 _remoted），
-    通过 Bonjour/mDNS 发现设备的隧道服务，然后建立 TCP 隧道。
-
-    iOS 18.2+ 移除了 QUIC 协议支持，只能使用 TCP。
+    使用 `CoreDeviceTunnelProxy` lockdown 服务，直接在 USB 上建立 TCP 隧道，
+    完全绕过 mDNS/Bonjour 发现过程，解决 Windows 上 mDNS 跨接口失效的问题。
 
     Returns:
         (tunnel_rsd, tunnel_ctx) 元组:
-        - tunnel_rsd: RSD 客户端，用于后续 DVT 操作
-        - tunnel_ctx: 隧道上下文管理器，用于清理时关闭隧道
+        - tunnel_rsd: RSD 客户端，用于 DVT 操作
+        - tunnel_ctx: 隧道上下文管理器，用于清理
     """
-    # 验证隧道所需的依赖是否已安装（如 quic 库）
+
     verify_tunnel_imports()
 
-    # 通过 Bonjour/mDNS 发现远程配对隧道服务
-    # 先尝试带 UDID 过滤（精确匹配），再尝试无过滤
-    logger.info("Discovering tunnel services (timeout=30s)...")
-    services = await get_remote_pairing_tunnel_services(
-        bonjour_timeout=30.0, udid=lockdown.udid
-    )
-
-    if not services:
-        services = await get_remote_pairing_tunnel_services(bonjour_timeout=30.0)
-
-    if not services:
-        raise RuntimeError(
-            "Cannot discover device tunnel service.\n"
-            "Ensure device is connected, unlocked, and trusted."
-        )
-
-    # 取第一个发现的隧道服务（通常只有一台设备）
-    service = services[0]
-    logger.info("Starting %s tunnel...", protocol.value)
-    # 启动隧道并获取连接信息（地址、端口）
-    tunnel_ctx = start_tunnel(service, protocol=protocol)
+    logger.info("Starting tunnel via lockdown (USB direct)...")
+    proxy = await CoreDeviceTunnelProxy.create(lockdown)
+    tunnel_ctx = proxy.start_tcp_tunnel()
     tunnel_result = await tunnel_ctx.__aenter__()
-    logger.info("Tunnel: %s:%s (%s)",
-                tunnel_result.address, tunnel_result.port, tunnel_result.protocol)
 
-    # 在隧道上创建 RSD 客户端（用于后续服务调用，如 DVT）
+    logger.info("Tunnel: %s:%s (%s)",
+                tunnel_result.address, tunnel_result.port,
+                tunnel_result.protocol)
+
+    # 在隧道上创建 RSD 客户端
     tunnel_rsd = RemoteServiceDiscoveryService(
         (tunnel_result.address, tunnel_result.port)
     )
@@ -156,15 +137,3 @@ async def setup_tunnel(lockdown: LockdownClient, protocol: TunnelProtocol = Tunn
     logger.info("RSD over tunnel connected")
 
     return tunnel_rsd, tunnel_ctx
-
-
-async def teardown_tunnel(tunnel_rsd, tunnel_ctx):
-    """安全拆除隧道：先关 RSD 连接，再退出隧道上下文。"""
-    try:
-        await tunnel_rsd.close()
-    except Exception:
-        pass
-    try:
-        await tunnel_ctx.__aexit__(None, None, None)
-    except Exception:
-        pass
