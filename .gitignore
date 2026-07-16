@@ -2,6 +2,7 @@
 build/
 dist/
 *.spec
+!ios_loc_sim.spec
 
 # ---- Python ----
 __pycache__/

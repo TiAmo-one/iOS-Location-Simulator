@@ -2,9 +2,18 @@
 chcp 65001 >nul 2>&1
 cd /d "%~dp0"
 
+set MODE=%1
+if "%MODE%"=="" set MODE=onefile
+if /i "%MODE%"=="folder" set COLLECT_MODE=1& set MODE_LABEL=Folder
+if /i "%MODE%"=="onefile" set COLLECT_MODE=0& set MODE_LABEL=Single File
+
 echo ============================================================
-echo   iOS Location Simulator - Build
+echo   iOS Location Simulator - Build [%MODE_LABEL%]
 echo ============================================================
+echo.
+echo   onefile  = single .exe (portable, slower startup^)
+echo   folder   = folder output (fast startup, needs whole folder^)
+echo   Usage: build.bat [onefile^|folder]
 echo.
 
 echo [1/3] Checking dependencies...
@@ -20,6 +29,7 @@ echo.
 echo [2/3] Cleaning old build...
 if exist "build" rmdir /s /q "build"
 if exist "dist\iOS_Location_Simulator" rmdir /s /q "dist\iOS_Location_Simulator"
+if exist "dist\iOS_Location_Simulator.exe" del /q "dist\iOS_Location_Simulator.exe"
 
 echo.
 echo [3/3] Building (3-7 minutes)...
@@ -35,11 +45,11 @@ if errorlevel 1 (
 
 echo.
 echo ============================================================
-REM (single-file mode: nothing to clean)
-echo   Output: dist\iOS_Location_Simulator.exe
+if "%COLLECT_MODE%"=="1" (
+    echo   Output: dist\iOS_Location_Simulator\  (folder)
+) else (
+    echo   Output: dist\iOS_Location_Simulator.exe  (single file)
+)
 echo ============================================================
-echo.
-echo Copy iOS_Location_Simulator.exe to any PC and run
-echo it as Administrator.
 echo.
 pause
