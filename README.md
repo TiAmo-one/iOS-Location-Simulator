@@ -51,21 +51,22 @@ python main.py        # CLI 命令行模式
 
 ### 方式二: 打包为独立 exe
 
+支持两种打包模式，通过 `build.bat` 一键构建：
+
 ```bash
 conda activate 你的环境名
 pip install -r requirements.txt
 
-# 一键打包（推荐）
-.\build.bat
-
-# 或手动打包
-python -m PyInstaller ios_loc_sim.spec --clean --noconfirm
+.\build.bat              # 单文件模式（默认）
+.\build.bat folder       # 文件夹模式
 ```
 
-输出为 `dist/iOS_Location_Simulator.exe`（单文件），复制到任意电脑即可运行，无需安装 Python。
+| 模式 | 命令 | 输出 | 特点 |
+|------|------|------|------|
+| **单文件** | `build.bat` | `dist/iOS_Location_Simulator.exe` | 单个 exe，便携易分发，启动需解压（稍慢） |
+| **文件夹** | `build.bat folder` | `dist/iOS_Location_Simulator/` | 文件夹输出，启动秒开，需整体复制 |
 
-> 如需预编译版本，请查看 [Releases](https://github.com/TiAmo-one/iOS-Location-Simulator/releases) 页面下载。
-
+> 打包输出无需安装 Python，复制到任意电脑即可运行。
 ## 项目结构
 
 ```
