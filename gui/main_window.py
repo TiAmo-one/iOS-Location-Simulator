@@ -56,20 +56,56 @@ MAP_HTML = r"""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- CDN不可用时显示离线提示 -->
+<script>
+if (typeof L === "undefined") {
+    window._leafletMissing = true;
+}
+</script>
 <!-- QWebChannel 桥接：让 JS 可以调用 Python 方法 -->
 <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 <style>
 *{margin:0;padding:0}html,body{height:100%}#map{height:100%}.leaflet-control-attribution{pointer-events:none}
+#offline-hint{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;
+background:rgba(0,0,0,0.82);color:#fff;padding:22px 32px;border-radius:10px;
+text-align:center;font-size:15px;line-height:1.7;max-width:460px;}
+#offline-hint a{color:#4FC3F7;}
 </style>
 </head><body>
 <div id="map"></div>
+<div id="offline-hint">
+<strong>地图加载失败 - 当前处于离线状态</strong><br><br>
+核心定位功能不受影响，您可以：<br>
+1. 在上方输入框中<b>手动输入坐标</b>（BD-09 坐标系）<br>
+2. <a href="https://api.map.baidu.com/lbsapi/getpoint/index.html" target="_blank">点击此处</a>打开百度拾取坐标，复制经纬度<br>
+3. 坐标格式：<b>纬度,经度</b>（如 30.528024,120.733557）<br>
+<br><small>联网后将自动恢复地图显示</small>
+</div>
 <script>
+// ---------- 离线检测 ----------
+if (window._leafletMissing) {
+    document.getElementById("offline-hint").style.display = "block";
+}
+var _tileErrorCount = 0;
+function _showOfflineHint() {
+    document.getElementById("offline-hint").style.display = "block";
+    if (typeof backend !== "undefined" && backend && backend.map_load_failed) {
+        backend.map_load_failed();
+    }
+}
+
+if (typeof L !== "undefined") {
 // ---------- 初始化地图 ----------
 // 默认中心点：成都 (30.3116, 104.3192)，缩放级别 15
 var map = L.map("map",{center:[30.3116,104.3192],zoom:15});
 
 // 使用高德地图瓦片（国内最全最清晰）
-L.tileLayer("https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",{maxZoom:18,maxNativeZoom:18,subdomains:"1234",attribution:"&copy; 高德地图"}).addTo(map);
+L.tileLayer("https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",{maxZoom:18,maxNativeZoom:18,subdomains:"1234",attribution:"&copy; 高德地图"}).on("tileerror", function(e) {
+        _tileErrorCount++;
+        if (_tileErrorCount >= 3) {
+            _showOfflineHint();
+        }
+    }).addTo(map);
 
 var marker = null;       // 当前地图标记
 var backend = null;      // Python 端 MapBridge 对象
@@ -131,6 +167,11 @@ class MapBridge(QObject):
         if self._callback:
             self._callback(lat, lng)
 
+    @pyqtSlot()
+    def map_load_failed(self):
+        """JS 调用：地图瓦片加载失败（离线信号）。"""
+        pass
+
 
 class MainWindow(QMainWindow):
     """
@@ -157,6 +198,8 @@ class MainWindow(QMainWindow):
 
         self._setup_ui()
         self._setup_map()
+        # 监听地图离线状态，更新状态栏提示
+        self._bridge.map_load_failed.connect(self._on_map_offline)
 
         # 状态栏
         self.status_bar = QStatusBar()
@@ -249,6 +292,12 @@ class MainWindow(QMainWindow):
     #  用户交互处理
     # ================================================================
 
+    def _on_map_offline(self):
+        """地图加载失败（离线）：在状态栏提示用户手动输入坐标。"""
+        self.status_bar.showMessage(
+            "Map unavailable (offline) - enter BD-09 coords manually, e.g. 30.528024,120.733557"
+        )
+
     def _on_map_clicked(self, lat: float, lng: float):
         """地图点击回调：将坐标填入输入框。"""
         self._current_lat = lat
@@ -279,14 +328,14 @@ class MainWindow(QMainWindow):
     # ================================================================
 
     def _disable_ui(self):
-        """连接中：禁用地图和输入控件，防止用户误操作。"""
+        """连接中：禁用地图和输入控件，保留取消按钮。"""
         self._connecting = True
         self.set_btn.setEnabled(False)
-        self.restore_btn.setEnabled(False)
+        self.restore_btn.setEnabled(True)
+        self.restore_btn.setText("Cancel")
         self.lat_input.setEnabled(False)
         self.lng_input.setEnabled(False)
         self.web_view.page().runJavaScript("disableMap();")
-
     def _enable_ui(self):
         """连接成功：恢复地图交互，按钮变为 Update Location。"""
         self._connecting = False
@@ -361,6 +410,7 @@ class MainWindow(QMainWindow):
         self.set_btn.setText("Set Location")
         self.set_btn.setEnabled(True)
         self.restore_btn.setEnabled(False)
+        self.restore_btn.setText("Restore Location")
         self.lat_input.setEnabled(True)
         self.lng_input.setEnabled(True)
 

@@ -40,7 +40,13 @@ async def main_async():
         if mode == "static":
             target = getattr(config.config, "targetLocation", None)
             if target is None:
-                print("Enter coords (lat,lng, BD-09):")
+                print("=" * 55)
+                print("Enter target coordinates (BD-09 coordinate system):")
+                print("  Format: latitude,longitude")
+                print("  Example: 30.528024,120.733557")
+                print("  Tip: open https://api.map.baidu.com/lbsapi/getpoint/index.html")
+                print("       click on map to get BD-09 coords, then copy-paste here")
+                print("=" * 55)
                 user_input = input().strip()
                 parts = user_input.split(",")
                 target_lat = float(parts[0].strip())
