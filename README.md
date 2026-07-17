@@ -63,8 +63,8 @@ pip install -r requirements.txt
 
 | 模式 | 命令 | 输出 | 特点 |
 |------|------|------|------|
-| **单文件** | `build.bat` | `dist/iOS_Location_Simulator.exe` | 单个 exe，便携易分发，启动需解压（稍慢） |
-| **文件夹** | `build.bat folder` | `dist/iOS_Location_Simulator/` | 文件夹输出，启动秒开，需整体复制 |
+| **单文件** | `build.bat` | `dist/iOS_Location_Simulator.exe` (~176 MB) | 单个 exe，便携易分发，启动需解压（稍慢） |
+| **文件夹** | `build.bat folder` | `dist/iOS_Location_Simulator/` (~417 MB) | 文件夹输出，启动秒开，需整体复制 |
 
 > 打包输出无需安装 Python，复制到任意电脑即可运行。
 ## 项目结构
