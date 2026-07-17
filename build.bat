@@ -46,6 +46,7 @@ if errorlevel 1 (
 echo.
 echo ============================================================
 if "%COLLECT_MODE%"=="1" (
+    if exist "dist\iOS_Location_Simulator.exe" del /q "dist\iOS_Location_Simulator.exe"
     echo   Output: dist\iOS_Location_Simulator\  (folder)
 ) else (
     echo   Output: dist\iOS_Location_Simulator.exe  (single file)
