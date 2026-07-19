@@ -32,7 +32,7 @@ async def run_static(rsd, lat: float, lng: float):
     await session.set(wgs_lat, wgs_lng)
 
     print(f"Location set (BD-09): ({lat}, {lng})")
-        print("-" * 45)
+    print("-" * 45)
     print("Enter new coords (lat,lng BD-09) to update,")
     print("or type 'q' to quit")
     print("-" * 45)
